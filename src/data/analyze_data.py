@@ -61,4 +61,4 @@ def analyze_data(df: pd.DataFrame, method: str = "info", column: list = None) ->
             
     
 if __name__ == "__main__":
-    analyze_data(load_bankruptcy_data(), method="high_correlation_matrix", column=None) 
+    analyze_data(load_bankruptcy_data(), method="correlation_matrix", column=None) 
