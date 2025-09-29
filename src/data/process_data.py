@@ -28,11 +28,6 @@ def __train_test_split (df: pd.DataFrame, test_size: int = 0.2, label = "Bankrup
     test_size=test_size, 
     stratify=y,
     random_state=42)
-    
-    print(X_train.shape)
-    print(X_test.shape)
-    print(y_train.shape)
-    print(y_test.shape)
 
     
     
@@ -48,4 +43,7 @@ def process_data (df) -> pd.DataFrame:
 
 
 if __name__ == "__main__":
-    __train_test_split(load_bankruptcy_data()) 
+    __train_test_split(load_bankruptcy_data())
+    #Keep: X86, X4
+    #Delete: X1,X2,X3, X5, X89
+    
