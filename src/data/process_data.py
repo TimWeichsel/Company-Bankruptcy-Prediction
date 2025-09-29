@@ -43,6 +43,9 @@ def __reduce_to_columns (df, keep_columns: list) -> pd.DataFrame:
     return df[keep_columns]
 
 
+def process_data (df) -> pd.DataFrame:
+    pass
+
 
 if __name__ == "__main__":
     __train_test_split(load_bankruptcy_data()) 
