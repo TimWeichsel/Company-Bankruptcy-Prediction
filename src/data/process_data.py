@@ -28,6 +28,8 @@ def __train_test_split (df: pd.DataFrame, test_size: int = 0.2, label = "Bankrup
     test_size=test_size, 
     stratify=y,
     random_state=42)
+    
+    return X_train, X_test, y_train, y_test
 
     
     
@@ -44,6 +46,5 @@ def process_data (df) -> pd.DataFrame:
 
 if __name__ == "__main__":
     __train_test_split(load_bankruptcy_data())
-    #Keep: X86, X4
-    #Delete: X1,X2,X3, X5, X89
-    
+    #Keep: X86, X4, X6, X8 (X6 und X8 nocht stark korreliert!), X16, X19, X20, X26
+    #Delete: X1,X2,X3, X5, X89, X7, X10, X17, X18, X21, X43, X42, X27

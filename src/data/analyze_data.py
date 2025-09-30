@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 from load_data import load_bankruptcy_data
+from process_data import __train_test_split
 import matplotlib.pyplot as plt
 
 def analyze_data(df: pd.DataFrame, method: str = "info", column: list = None) -> None:
@@ -61,4 +62,5 @@ def analyze_data(df: pd.DataFrame, method: str = "info", column: list = None) ->
             
     
 if __name__ == "__main__":
-    analyze_data(load_bankruptcy_data(), method="correlation_matrix", column=None) 
+    X_train, X_test, y_train, y_test = __train_test_split(load_bankruptcy_data())
+    analyze_data(X_train, method="high_correlation_matrix", column=None) 
