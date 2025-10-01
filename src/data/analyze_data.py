@@ -5,7 +5,7 @@ from process_data import __train_test_split
 from process_data import get_processed_data
 import matplotlib.pyplot as plt
 
-def analyze_data(df: pd.DataFrame, method: str = "info", column: list = None) -> None:
+def analyze_features(df: pd.DataFrame, method: str = "info", column: list = None) -> None:
     '''
     Prints specific analyzis
     
@@ -37,7 +37,7 @@ def analyze_data(df: pd.DataFrame, method: str = "info", column: list = None) ->
         case "high_correlation_matrix":
                 num_df = df.select_dtypes(include=[np.number])
                 corr_matrix = num_df.corr()         
-                threshold = 0.9
+                threshold = 0.8
 
                 mask = corr_matrix.abs() > threshold
                 np.fill_diagonal(mask.values, False) 
@@ -59,9 +59,15 @@ def analyze_data(df: pd.DataFrame, method: str = "info", column: list = None) ->
                 plt.show()
         case _:
             raise ValueError("Unknown method")
-        
+
+def analyze_label(y_train: pd.Series, method: str = "info") -> None:
+    match method:
+        case "histo":
+            plt.hist(y_train)
+            plt.show()
             
     
 if __name__ == "__main__":
     X_train, X_test, y_train, y_test = get_processed_data()
-    analyze_data(X_train, method="high_correlation_matrix", column=None) 
+    analyze_features(X_train, method="high_correlation_matrix", column=None) 
+    analyze_label(y_train, method="histo")
