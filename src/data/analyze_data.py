@@ -69,5 +69,5 @@ def analyze_label(y_train: pd.Series, method: str = "info") -> None:
     
 if __name__ == "__main__":
     X_train, X_test, y_train, y_test = get_processed_data()
-    analyze_features(X_train, method="high_correlation_matrix", column=None) 
+    analyze_features(X_train, method="correlation_matrix", column=None) 
     analyze_label(y_train, method="histo")
