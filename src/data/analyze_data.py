@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import math
 from load_data import load_bankruptcy_data
 from process_data import __train_test_split
 from process_data import get_processed_data
@@ -57,6 +58,9 @@ def analyze_features(df: pd.DataFrame, method: str = "info", column: list = None
                 ax.set_title(f'Correlation Matrix (nur Features mit |ρ| > {threshold})', pad=12, fontsize=10)
                 fig.tight_layout()
                 plt.show()
+        case "histo":
+            plt.hist(df)
+            plt.show()
         case _:
             raise ValueError("Unknown method")
 
@@ -68,6 +72,13 @@ def analyze_label(y_train: pd.Series, method: str = "info") -> None:
             
     
 if __name__ == "__main__":
-    X_train, X_test, y_train, y_test = get_processed_data()
-    analyze_features(X_train, method="correlation_matrix", column=None) 
-    analyze_label(y_train, method="histo")
+    X_train, X_test, y_train, y_test, X_train_smote, y_train_smote, df = get_processed_data()
+    #print(X_train_smote.columns)
+    #X_train_smote_ln = X_train_smote.apply(np.log1p)
+    print(df[df[' Operating Profit Rate']<0.8])
+    #analyze_features(X_train_smote, method="histo", column=' Operating Gross Margin')
+    analyze_features(X_train_smote, method="describe", column=' Operating Profit Rate')
+    
+    #analyze_features(X_train, method="correlation_matrix", column=None) 
+    #analyze_label(y_train, method="histo")
+    #analyze_label(y_train_smote, method="histo")
