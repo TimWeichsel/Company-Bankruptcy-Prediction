@@ -2,6 +2,7 @@ import pandas as pd
 from load_data import load_bankruptcy_data
 from sklearn.model_selection import train_test_split
 from imblearn.over_sampling import SMOTE
+from sklearn.ensemble import IsolationForest
 
 #Keep: X86, X4, X6 , X16, X19, X20, X26, X75, X25, X26, X37, X91, X64
 #Delete: X1,X2,X3, X5,X8, X89, X7, X10, X17, X18, X21, X43, X42, X27, X9, X73, X23, X31, X38, X40, X77, X66, X78, X22, X32, X61
@@ -75,22 +76,34 @@ def __drop_columns (df: pd.DataFrame, columns_to_drop: list) -> pd.DataFrame:
         raise ValueError (f"Columns not known: {missing_columns}")
     return df.drop(columns=columns_to_drop)
 
-def __remove_outliers_IQR (df: pd.DataFrame, factor: float = 5, outlier_columns_threshold:int = 5) -> pd.DataFrame:
-    outlier_counter_row = {row:0 for row in df.index}
-    print ("Number of Rows before outlier removal: ", df.shape[0])
-    for column in df.select_dtypes(include=['number']).columns:
+def __remove_outliers_IQR (X_train: pd.DataFrame, y_train: pd.DataFrame, factor: float = 200, outlier_columns_threshold:int = 10, ultimate_factor = 1000) -> tuple[pd.DataFrame, pd.Series]:
+    outlier_counter_row = {row:0 for row in X_train.index}
+    print ("Number of Rows before outlier removal: ", X_train.shape[0])
+    for column in X_train.select_dtypes(include=['number']).columns:
+        Q1 = X_train[column].quantile(0.25)
+        Q3 = X_train[column].quantile(0.75)
+        IQR = Q3 - Q1
         if IQR == 0:
             continue
-        Q1 = df[column].quantile(0.25)
-        Q3 = df[column].quantile(0.75)
-        IQR = Q3 - Q1
         lower_bound = Q1 - factor * IQR
         upper_bound = Q3 + factor * IQR
-        outlier_counter_row = {row:(outlier_counter_row[row]+1) if (df.at[row, column] < lower_bound or df.at[row, column] > upper_bound) else outlier_counter_row[row] for row in df.index}
+        ultimate_lower_bound = Q1 - ultimate_factor * IQR
+        ultimate_upper_bound = Q3 + ultimate_factor * IQR
+        outlier_counter_row = {row:(outlier_counter_row[row]+1) if (X_train.at[row, column] < lower_bound or X_train.at[row, column] > upper_bound) else outlier_counter_row[row] for row in X_train.index}
+        outlier_counter_row = {row:(outlier_counter_row[row]+outlier_columns_threshold) if (X_train.at[row, column] < ultimate_lower_bound or X_train.at[row, column] > ultimate_upper_bound) else outlier_counter_row[row] for row in X_train.index}
     outlier_indices = [row for row, count in outlier_counter_row.items() if count >= outlier_columns_threshold]
-    df = df.drop(outlier_indices, axis=0)
-    print ("Number of Rows after outlier removal: ", df.shape[0])
-    return df
+    X_train = X_train.drop(outlier_indices, axis=0)
+    y_train = y_train.drop(outlier_indices, axis=0)
+    print ("Number of Rows after outlier removal: ", X_train.shape[0])
+    return X_train, y_train
+
+def isolationForest_outlier_removal (X_train: pd.DataFrame, y_train: pd.DataFrame, contamination: float = 0.1) -> tuple[pd.DataFrame, pd.Series]:
+    print ("Number of Rows before outlier removal: ", X_train.shape[0])
+    iso = IsolationForest(contamination=contamination, random_state=42)
+    mask = iso.fit_predict(X_train) != -1
+    X_train, y_train = X_train[mask], y_train[mask] 
+    print ("Number of Rows after outlier removal: ", X_train.shape[0])
+    return X_train, y_train
         
 
 def __smote_oversampling (X_train: pd.DataFrame, y_train: pd.DataFrame) -> tuple [pd.DataFrame, pd.DataFrame]:
@@ -104,7 +117,8 @@ def get_processed_data () -> tuple [pd.DataFrame, pd.DataFrame, pd.DataFrame, pd
     df = __drop_columns (df, columns_to_drop)
     X_train, X_test, y_train, y_test = __train_test_split(df)
     X_train, X_val, y_train, y_val = __train_val_split (X_train, y_train)
-    X_train = __remove_outliers_IQR(df=X_train)
+    #X_train, y_train = __remove_outliers_IQR(X_train=X_train, y_train=y_train) #Features are alreay scaled -> no classic outlier removal possible
+    X_train, y_train = isolationForest_outlier_removal (X_train, y_train)
     X_train_smote, y_train_smote = __smote_oversampling (X_train, y_train)
     return X_train, X_val, X_test, y_train, y_val, y_test, X_train_smote, y_train_smote, df
 
