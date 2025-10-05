@@ -75,9 +75,8 @@ if __name__ == "__main__":
     X_train, X_test, y_train, y_test, X_train_smote, y_train_smote, df = get_processed_data()
     #print(X_train_smote.columns)
     #X_train_smote_ln = X_train_smote.apply(np.log1p)
-    print(df[df[' Operating Profit Rate']<0.8])
     #analyze_features(X_train_smote, method="histo", column=' Operating Gross Margin')
-    analyze_features(X_train_smote, method="describe", column=' Operating Profit Rate')
+    analyze_features(X_train_smote, method="histo", column=' Operating Profit Rate')
     
     #analyze_features(X_train, method="correlation_matrix", column=None) 
     #analyze_label(y_train, method="histo")
