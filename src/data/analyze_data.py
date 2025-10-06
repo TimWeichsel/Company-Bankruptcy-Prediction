@@ -61,13 +61,25 @@ def analyze_features(df: pd.DataFrame, method: str = "info", column: list = None
         case "histo":
             plt.hist(df, bins=1000, color='skyblue', edgecolor='black', alpha=0.8)
             plt.show()
-        case "boxplot":
-            plt.boxplot(df, vert=True, patch_artist=True,
-                        boxprops=dict(facecolor='lightblue', color='black'),
-                        medianprops=dict(color='red'),
-                        whiskerprops=dict(color='black'),
-                        capprops=dict(color='black'))
-            plt.show()
+        case "box":
+            if column is not None:
+                plt.boxplot(df, vert=True, patch_artist=True,
+                            boxprops=dict(facecolor='lightblue', color='black'),
+                            medianprops=dict(color='red'),
+                            whiskerprops=dict(color='black'),
+                            capprops=dict(color='black'))
+                plt.show()
+            else:
+                num_df = df.select_dtypes(include=[np.number])
+                plt.figure(figsize=(max(10, len(num_df.columns) * 0.5), 6))
+                plt.boxplot(num_df.values, patch_artist=True,
+                            boxprops=dict(facecolor='lightblue', color='black'),
+                            medianprops=dict(color='red'),
+                            whiskerprops=dict(color='black'),
+                            capprops=dict(color='black'),
+                            flierprops=dict(marker='o', markersize=2, color='gray'))
+                plt.tight_layout()
+                plt.show()
         case _:
             raise ValueError("Unknown method")
 
@@ -79,12 +91,15 @@ def analyze_label(y_train: pd.Series, method: str = "info") -> None:
             
     
 if __name__ == "__main__":
-    X_train, X_val, X_test, y_train, y_val, y_test, X_train_smote, y_train_smote, df = get_processed_data()
+    X_train, X_test, y_train, y_test, X_train_smote, y_train_smote, X_train_raw, y_train_raw, df = get_processed_data()
     #print(X_train_smote.columns)
     #X_train_smote_ln = X_train_smote.apply(np.log1p)
     #analyze_features(X_train_smote, method="histo", column=' Operating Gross Margin')
     print(X_train_smote.columns)
     analyze_features(X_train, method="describe", column=' Operating Gross Margin')
+    analyze_features(X_train, method="box")
+    analyze_features(X_train_raw, method="box")
+    
     
     
     #analyze_features(X_train, method="correlation_matrix", column=None) 

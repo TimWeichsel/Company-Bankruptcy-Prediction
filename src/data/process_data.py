@@ -115,12 +115,10 @@ def __smote_oversampling (X_train: pd.DataFrame, y_train: pd.DataFrame) -> tuple
 def get_processed_data () -> tuple [pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     df = load_bankruptcy_data()
     df = __drop_columns (df, columns_to_drop)
-    X_train, X_test, y_train, y_test = __train_test_split(df)
-    X_train, X_val, y_train, y_val = __train_val_split (X_train, y_train)
-    #X_train, y_train = __remove_outliers_IQR(X_train=X_train, y_train=y_train) #Features are alreay scaled -> no classic outlier removal possible
-    X_train, y_train = isolationForest_outlier_removal (X_train, y_train)
+    X_train_raw, X_test, y_train_raw, y_test = __train_test_split(df)
+    X_train, y_train = isolationForest_outlier_removal (X_train_raw, y_train_raw)
     X_train_smote, y_train_smote = __smote_oversampling (X_train, y_train)
-    return X_train, X_val, X_test, y_train, y_val, y_test, X_train_smote, y_train_smote, df
+    return X_train, X_test, y_train, y_test, X_train_smote, y_train_smote, X_train_raw, y_train_raw, df
 
 
 if __name__ == "__main__":
