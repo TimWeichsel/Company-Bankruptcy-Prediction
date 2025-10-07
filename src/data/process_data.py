@@ -1,5 +1,5 @@
 import pandas as pd
-from load_data import load_bankruptcy_data
+from .load_data import load_bankruptcy_data
 from sklearn.model_selection import train_test_split
 from imblearn.over_sampling import SMOTE
 from sklearn.ensemble import IsolationForest
