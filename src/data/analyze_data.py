@@ -80,6 +80,20 @@ def analyze_features(df: pd.DataFrame, method: str = "info", column: list = None
                             flierprops=dict(marker='o', markersize=2, color='gray'))
                 plt.tight_layout()
                 plt.show()
+        case "scatter_plot":
+            if column is not None and len(column) == 3:
+                column1 = column[0]
+                column2 = column[1]
+                label = column[2]
+                df = df[[column1, column2, label]]
+                print(df.columns)
+                plt.scatter(df[df[label] == 0][column1], df[df[label] == 0][column2],
+                            c="blue", s=5, label="No Bankruptcy")
+                plt.scatter(df[df[label] == 1][column1], df[df[label] == 1][column2],
+                            c="red", s=5, label="Bankruptcy")
+                plt.xlabel(column1)
+                plt.ylabel(column2)
+                plt.show()
         case _:
             raise ValueError("Unknown method")
 
@@ -92,13 +106,16 @@ def analyze_label(y_train: pd.Series, method: str = "info") -> None:
     
 if __name__ == "__main__":
     X_train, X_test, y_train, y_test, X_train_smote, y_train_smote, X_train_raw, y_train_raw, df = get_processed_data()
+
+    analyze_features(df, method="scatter_plot", column=[" Debt ratio %"," Total expense/Assets", "Bankrupt?"])
+    
     #print(X_train_smote.columns)
     #X_train_smote_ln = X_train_smote.apply(np.log1p)
     #analyze_features(X_train_smote, method="histo", column=' Operating Gross Margin')
-    print(X_train_smote.columns)
-    analyze_features(X_train, method="describe", column=' Operating Gross Margin')
-    analyze_features(X_train, method="box")
-    analyze_features(X_train_raw, method="box")
+    #print(X_train_smote.columns)
+    #analyze_features(X_train, method="describe", column=' Operating Gross Margin')
+    #analyze_features(X_train, method="box")
+    #analyze_features(X_train_raw, method="box")
     
     
     
