@@ -111,10 +111,18 @@ def __smote_oversampling (X_train: pd.DataFrame, y_train: pd.DataFrame) -> tuple
     X_resampled, y_resampled = smote.fit_resample(X_train, y_train)
     return X_resampled, y_resampled
 
+def __define_df_columns (df, method: str = "correlation_adjusted") -> pd.DataFrame:
+    match method:
+        case "all":
+            return df
+        case "correlation_adjusted":
+            return __drop_columns(df, columns_to_drop)
+        case default:
+            raise ValueError ("Mehod not known")
 
-def get_processed_data () -> tuple [pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+def get_processed_data (method: str = "correlation_adjusted") -> tuple [pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     df = load_bankruptcy_data()
-    df = __drop_columns (df, columns_to_drop)
+    df = __define_df_columns (df, method)
     X_train_raw, X_test, y_train_raw, y_test = __train_test_split(df)
     X_train, y_train = isolationForest_outlier_removal (X_train_raw, y_train_raw)
     X_train_smote, y_train_smote = __smote_oversampling (X_train, y_train)

@@ -1,4 +1,6 @@
 import numpy as np
+import joblib
+import os
 from sklearn.model_selection import GridSearchCV
 from sklearn.pipeline import Pipeline
 from sklearn.linear_model import LogisticRegression
@@ -49,12 +51,28 @@ grid_lda = GridSearchCV(
     n_jobs=4
 )
 
-grids = [grid_log_reg, grid_rf, grid_lda]
+grids = {"log_reg":grid_log_reg, "rf":grid_rf, "lda":grid_lda}
 
-if __name__ == "__main__":
-    X_train, X_test, y_train, y_test, X_train_smote, y_train_smote, X_train_raw, y_train_raw, df = get_processed_data()
-    for grid in grids:
+def run_models (data_method: str = "correlation_adjusted", skip_model_grids: str = None) -> None:
+    base_dir = os.path.join(os.path.dirname(__file__), "models")
+    model_dir = os.path.join(base_dir, "best_models")
+    param_dir = os.path.join(base_dir, "best_models_params")
+    X_train, X_test, y_train, y_test, X_train_smote, y_train_smote, X_train_raw, y_train_raw, df = get_processed_data(data_method)
+    for name, grid in grids.items():
+        if skip_model_grids is not None and name in skip_model_grids:
+            continue
         grid.fit(X_train_smote, y_train_smote)
         print("all results: ", grid.cv_results_)
-        print("best params: ", grid.best_params_)
-        print("best score: ", grid.best_score_)
+        best_params = grid.best_params_
+        best_score = grid.best_score_
+        print("best params: ", best_params)
+        print("best score: ", best_score)
+        model = grid.best_estimator_
+        model_file_dir = os.path.join(model_dir, f"best_{name}_{data_method}.pkl")
+        param_file_dir = os.path.join(param_dir, f"best_{name}_params_{data_method}.pkl")
+        joblib.dump(model, model_file_dir)
+        joblib.dump(best_params, param_file_dir)
+    
+
+if __name__ == "__main__":
+    run_models()
