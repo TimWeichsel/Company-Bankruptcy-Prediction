@@ -75,4 +75,5 @@ def run_models (data_method: str = "correlation_adjusted", skip_model_grids: str
     
 
 if __name__ == "__main__":
+    #skip_model_grids = ["log_reg","rf","lda"]
     run_models()
