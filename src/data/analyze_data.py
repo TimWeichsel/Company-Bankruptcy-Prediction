@@ -105,9 +105,9 @@ def analyze_label(y_train: pd.Series, method: str = "info") -> None:
             
     
 if __name__ == "__main__":
-    X_train, X_test, y_train, y_test, X_train_smote, y_train_smote, X_train_raw, y_train_raw, df = get_processed_data()
+    X_train, X_test, y_train, y_test, X_train_smote, y_train_smote, X_train_raw, y_train_raw, df = get_processed_data(method="BS_PnL")
 
-    analyze_features(df, method="scatter_plot", column=[" Debt ratio %"," Total expense/Assets", "Bankrupt?"])
+    #analyze_features(df, method="scatter_plot", column=[" Debt ratio %"," Total expense/Assets", "Bankrupt?"])
     
     #print(X_train_smote.columns)
     #X_train_smote_ln = X_train_smote.apply(np.log1p)
@@ -119,6 +119,6 @@ if __name__ == "__main__":
     
     
     
-    #analyze_features(X_train, method="correlation_matrix", column=None) 
+    analyze_features(X_train, method="high_correlation_matrix", column=None) 
     #analyze_label(y_train, method="histo")
     #analyze_label(y_train_smote, method="histo")

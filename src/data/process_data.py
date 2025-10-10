@@ -6,7 +6,10 @@ from sklearn.ensemble import IsolationForest
 
 #Keep: X86, X4, X6 , X16, X19, X20, X26, X75, X25, X26, X37, X91, X64
 #Delete: X1,X2,X3, X5,X8, X89, X7, X10, X17, X18, X21, X43, X42, X27, X9, X73, X23, X31, X38, X40, X77, X66, X78, X22, X32, X61
-columns_to_drop = [' ROA(C) before interest and depreciation before interest',' ROA(A) before interest and % after tax',' ROA(B) before interest and depreciation after tax',' Realized Sales Gross Margin',' After-tax net Interest Rate',' Gross Profit to Sales',' Pre-tax net Interest Rate',' Continuous interest rate (after tax)',' Net Value Per Share (A)',' Net Value Per Share (C)',' Revenue Per Share (Yuan ¥)',' Net profit before tax/Paid-in capital',' Operating profit/Paid-in capital',' Regular Net Profit Growth Rate',' Non-industry income and expenditure/revenue',' Working capitcal Turnover Rate',' Per Share Net profit before tax (Yuan ¥)',' Total Asset Return Growth Rate Ratio',' Net worth/Assets',' Borrowing dependency',' Current Liability to Liability',' Current Liabilities/Equity',' Current Liability to Equity',  ' Cash Flow to Sales', ' Operating Profit Per Share (Yuan ¥)', ' Cash Reinvestment %', ' Operating Funds to Liability', ' Contingent liabilities/Net worth', ' Current Liability to Assets']   
+correlated_columns_to_drop = [' ROA(C) before interest and depreciation before interest',' ROA(A) before interest and % after tax',' ROA(B) before interest and depreciation after tax',' Realized Sales Gross Margin',' After-tax net Interest Rate',' Gross Profit to Sales',' Pre-tax net Interest Rate',' Continuous interest rate (after tax)',' Net Value Per Share (A)',' Net Value Per Share (C)',' Revenue Per Share (Yuan ¥)',' Net profit before tax/Paid-in capital',' Operating profit/Paid-in capital',' Regular Net Profit Growth Rate',' Non-industry income and expenditure/revenue',' Working capitcal Turnover Rate',' Per Share Net profit before tax (Yuan ¥)',' Total Asset Return Growth Rate Ratio',' Net worth/Assets',' Borrowing dependency',' Current Liability to Liability',' Current Liabilities/Equity',' Current Liability to Equity',  ' Cash Flow to Sales', ' Operating Profit Per Share (Yuan ¥)', ' Cash Reinvestment %', ' Operating Funds to Liability', ' Contingent liabilities/Net worth', ' Current Liability to Assets']
+BS_PnL_columns = ['Bankrupt?', ' Operating Profit Growth Rate', ' After-tax Net Profit Growth Rate', ' Total Asset Growth Rate', ' Net Value Growth Rate', ' Current Ratio', ' Quick Ratio', ' Total debt/Total net worth', ' Debt ratio %', ' Inventory and accounts receivable/Net value', ' Total Asset Turnover', ' Accounts Receivable Turnover', ' Average Collection Days', ' Inventory Turnover Rate (times)', ' Fixed Assets Turnover Frequency', ' Net Worth Turnover Rate (times)', ' Working Capital to Total Assets', ' Quick Assets/Total Assets', ' Current Assets/Total Assets', ' Cash/Total Assets', ' Quick Assets/Current Liability', ' Cash/Current Liability', ' Inventory/Working Capital', ' Inventory/Current Liability', ' Current Liabilities/Liability', ' Working Capital/Equity', ' Retained Earnings to Total Assets', ' Current Asset Turnover Rate', ' Quick Asset Turnover Rate', ' Cash Turnover Rate', ' Fixed Assets to Assets', ' Current Liability to Current Assets', ' Liability-Assets Flag', ' Net Income to Total Assets', " Net Income to Stockholder's Equity", ' Liability to Equity', ' Net Income Flag', ' Equity to Liability']
+BS_PnL_columns_to_be_droped = [' Current Ratio', ' Total debt/Total net worth', ' Liability to Equity', ' Net Worth Turnover Rate (times)', ' Working Capital/Equity', ' Net Income to Total Assets']
+
 def __train_test_split (df: pd.DataFrame, test_size: int = 0.2, label = "Bankrupt?") -> tuple [pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     '''
     Split Dataframe to Train and Test -> Features and Labels
@@ -59,10 +62,8 @@ def __train_val_split (X_train: pd.DataFrame, y_train: pd.Series, val_size: int 
     
     
 def __reduce_to_columns (df, keep_columns: list) -> pd.DataFrame:
-    missing_columns = [column for column in keep_columns if column not in df]
-    if missing_columns:
-        raise ValueError (f"Columns not known: {missing_columns}")
-    return df[keep_columns]
+    existing_cols = [col for col in keep_columns if col in df.columns]
+    return df[existing_cols]
 
 def __drop_rows (df: pd.DataFrame, rows_to_drop: list) -> pd.DataFrame:
     missing_rows = [row for row in rows_to_drop if row not in df.index]
@@ -71,10 +72,8 @@ def __drop_rows (df: pd.DataFrame, rows_to_drop: list) -> pd.DataFrame:
     return df.drop(rows_to_drop, axis=0)
 
 def __drop_columns (df: pd.DataFrame, columns_to_drop: list) -> pd.DataFrame:
-    missing_columns = [column for column in columns_to_drop if column not in df]
-    if missing_columns:
-        raise ValueError (f"Columns not known: {missing_columns}")
-    return df.drop(columns=columns_to_drop)
+    existing_cols = [col for col in columns_to_drop if col in df.columns]
+    return df.drop(columns=existing_cols)
 
 def __remove_outliers_IQR (X_train: pd.DataFrame, y_train: pd.DataFrame, factor: float = 200, outlier_columns_threshold:int = 10, ultimate_factor = 1000) -> tuple[pd.DataFrame, pd.Series]:
     outlier_counter_row = {row:0 for row in X_train.index}
@@ -116,7 +115,11 @@ def __define_df_columns (df, method: str = "correlation_adjusted") -> pd.DataFra
         case "all":
             return df
         case "correlation_adjusted":
-            return __drop_columns(df, columns_to_drop)
+            return __drop_columns(df, correlated_columns_to_drop)
+        case "BS_PnL": #Balance Sheet and PnL
+            df_bs_pnl = __reduce_to_columns(df, BS_PnL_columns)
+            df_reduced = __drop_columns(df_bs_pnl, correlated_columns_to_drop)
+            return __drop_columns(df_reduced, BS_PnL_columns_to_be_droped)
         case default:
             raise ValueError ("Mehod not known")
 
