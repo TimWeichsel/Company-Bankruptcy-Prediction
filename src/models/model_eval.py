@@ -13,7 +13,8 @@ def evaluate_models(data_method: str = "correlation_adjusted", eval_method: str 
     files = [f for f in os.listdir(folder) if os.path.isfile(os.path.join(folder, f))]
     for file in files:
         file_path = os.path.join(folder, file)
-        models[file] = joblib.load(file_path)
+        if file_path.endswith(f"_{data_method}.pkl"):
+            models[file] = joblib.load(file_path)
         
     X_train, X_test, y_train, y_test, X_train_smote, y_train_smote, X_train_raw, y_train_raw, df = get_processed_data(data_method)
     match eval_method:
@@ -34,4 +35,4 @@ def evaluate_models(data_method: str = "correlation_adjusted", eval_method: str 
             raise ValueError("Evaluation method not known")
         
 if __name__ == "__main__":
-    evaluate_models()
+    evaluate_models(data_method="BS_PnL")

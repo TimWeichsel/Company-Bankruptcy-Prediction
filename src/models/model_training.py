@@ -6,6 +6,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+from xgboost import XGBClassifier
 from src.data.process_data import get_processed_data
 
 pipe = Pipeline([("model", LogisticRegression())]) #Logistic Regression as placeholder
@@ -25,7 +26,15 @@ param_grid_lda = [
     { #Linear Discriminant Analysis
         "model": [LinearDiscriminantAnalysis()],
         "model__solver": ["svd", "lsqr", "eigen"],
-    }] 
+    }]
+
+param_grid_xgb = [
+    { #XGBoost
+        "model": [XGBClassifier()],
+        
+        
+    }
+]
 
 grid_log_reg = GridSearchCV(
     estimator=pipe,
@@ -54,7 +63,7 @@ grid_lda = GridSearchCV(
 grids = {"log_reg":grid_log_reg, "rf":grid_rf, "lda":grid_lda}
 
 def run_models (data_method: str = "correlation_adjusted", skip_model_grids: str = None) -> None:
-    base_dir = os.path.join(os.path.dirname(__file__), "models")
+    base_dir = os.path.join(os.path.dirname(__file__))
     model_dir = os.path.join(base_dir, "best_models")
     param_dir = os.path.join(base_dir, "best_models_params")
     X_train, X_test, y_train, y_test, X_train_smote, y_train_smote, X_train_raw, y_train_raw, df = get_processed_data(data_method)
@@ -76,4 +85,4 @@ def run_models (data_method: str = "correlation_adjusted", skip_model_grids: str
 
 if __name__ == "__main__":
     #skip_model_grids = ["log_reg","rf","lda"]
-    run_models()
+    run_models(data_method="BS_PnL")
