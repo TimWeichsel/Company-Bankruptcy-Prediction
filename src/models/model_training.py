@@ -32,14 +32,14 @@ param_grid_xgb = [
     { #XGBoost
         "model": [XGBClassifier()],
         "model__n_estimators": [500, 800, 1200],
-        "model__eta": [0.03, 0.05, 0.07, 0.1],
-        "model__max_depth": [3, 4, 5],
-        "model__min_child_weight": [3, 5, 7, 10],
-        "model__subsample": [0.6, 0.7, 0.8, 0.9],
-        "model__colsample_bytree": [0.5, 0.6, 0.7, 0.8, 0.9],
-        "model__gamma": [0, 0.1, 0.5, 1.0, 2.0],
-        "model__reg_lambda": [1, 5, 10, 20],
-        "model__reg_alpha": [0, 0.1, 1, 3, 5],
+        #"model__eta": [0.03, 0.05, 0.07, 0.1],
+        #"model__max_depth": [3, 4, 5],
+        #"model__min_child_weight": [3, 5, 7, 10],
+        #"model__subsample": [0.6, 0.7, 0.8, 0.9],
+        #"model__colsample_bytree": [0.5, 0.6, 0.7, 0.8, 0.9],
+        #"model__gamma": [0, 0.1, 0.5, 1.0, 2.0],
+        #"model__reg_lambda": [1, 5, 10, 20],
+        #"model__reg_alpha": [0, 0.1, 1, 3, 5],
     }
 ]
 
