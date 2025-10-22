@@ -1,6 +1,8 @@
 import numpy as np
 import joblib
 import os
+import torch
+from skorch import NeuralNetClassifier
 from sklearn.model_selection import GridSearchCV
 from sklearn.pipeline import Pipeline
 from sklearn.linear_model import LogisticRegression
@@ -8,6 +10,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.naive_bayes import GaussianNB
 from xgboost import XGBClassifier
+#from feed_forward import FeedForwardNet
 from src.data.process_data import get_processed_data
 
 pipe = Pipeline([("model", LogisticRegression())]) #Logistic Regression as placeholder
