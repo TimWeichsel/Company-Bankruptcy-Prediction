@@ -34,9 +34,9 @@ param_grid_lda = [
 
 param_grid_xgb = [
     { #XGBoost
-        "model": [XGBClassifier()],
+        "model": [XGBClassifier(tree_method="hist")],
         "model__n_estimators": [500, 800, 1200],
-        "model__eta": [0.03, 0.05, 0.07, 0.1],
+        "model__learning_rate": [0.03, 0.05, 0.07, 0.1],
         "model__max_depth": [3, 4, 5],
         #"model__min_child_weight": [3, 5, 7, 10],
         #"model__subsample": [0.6, 0.7, 0.8, 0.9],
