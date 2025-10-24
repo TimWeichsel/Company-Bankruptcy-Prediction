@@ -11,6 +11,6 @@ class FeedForwardNN (nn.Module):
         layers.append(nn.Linear(current_out_dim,1))
         self.layer_container = nn.Sequential(*layers)
         
-    def forward(self, X):
+    def forward(self, X): 
         return self.layer_container(X).squeeze(-1)
         
