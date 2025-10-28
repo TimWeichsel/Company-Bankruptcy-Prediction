@@ -1,7 +1,8 @@
 import numpy as np
 import joblib
 import os
-import torch
+import torch.optim as optim
+import torch.nn as nn
 from skorch import NeuralNetClassifier
 from sklearn.model_selection import GridSearchCV
 from sklearn.pipeline import Pipeline
@@ -10,7 +11,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.naive_bayes import GaussianNB
 from xgboost import XGBClassifier
-#from feed_forward import FeedForwardNet
+from feed_forward import FeedForwardNN
 from src.data.process_data import get_processed_data
 
 pipe = Pipeline([("model", LogisticRegression())]) #Logistic Regression as placeholder
@@ -54,6 +55,25 @@ param_grid_nb = [
     }
 ]
 
+net = NeuralNetClassifier (
+    FeedForwardNN,
+    max_epochs=50,
+    lr=0.001,
+    optimizer=optim.Adam,
+    criterion=nn.BCEWithLogitsLoss,
+    train_split=None,
+)
+
+param_grid_nn_ff = [
+    { #Feed Forward Neural Network
+        "model": [net],
+        "model__module__in_dim": [None],
+        "model__module__hidden_layer_dimension": [(128,64), (256,128), (64,128), (128,256), (32,64,128), (32,64,128,256)],
+        "model__module__dropout_rate": [0.2, 0.4],
+        "model__module__activation_func_class": [nn.ReLU]
+    }
+]
+
 grid_log_reg = GridSearchCV(
     estimator=pipe,
     param_grid=param_grid_log_reg,
@@ -94,13 +114,23 @@ grid_nb = GridSearchCV(
     n_jobs=4
 )
 
-grids = {"log_reg":grid_log_reg, "rf":grid_rf, "lda":grid_lda, "xgb":grid_xgb, "nb":grid_nb}
+
+grid_nn = GridSearchCV(
+    estimator=pipe,
+    param_grid=param_grid_nn_ff,
+    cv=5,
+    scoring='roc_auc',
+    n_jobs=4
+)
+
+grids = {"log_reg":grid_log_reg, "rf":grid_rf, "lda":grid_lda, "xgb":grid_xgb, "nb":grid_nb, "nn":grid_nn}
 
 def run_models (data_method: str = "correlation_adjusted", skip_model_grids: str = None) -> None:
     base_dir = os.path.join(os.path.dirname(__file__))
     model_dir = os.path.join(base_dir, "best_models")
     param_dir = os.path.join(base_dir, "best_models_params")
     X_train, X_test, y_train, y_test, X_train_smote, y_train_smote, X_train_raw, y_train_raw, df = get_processed_data(data_method)
+    param_grid_nn_ff[0]["model__module__in_dim"]=[X_train_smote.shape[1]]
     for name, grid in grids.items():
         if skip_model_grids is not None and name in skip_model_grids:
             continue
@@ -118,5 +148,5 @@ def run_models (data_method: str = "correlation_adjusted", skip_model_grids: str
     
 
 if __name__ == "__main__":
-    skip_model_grids = ["log_reg","rf","lda","xgb"]
+    skip_model_grids = ["log_reg","rf","lda","xgb","nb"]
     run_models(data_method="BS_PnL", skip_model_grids=skip_model_grids)
