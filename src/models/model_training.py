@@ -11,7 +11,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.naive_bayes import GaussianNB
 from xgboost import XGBClassifier
-from feed_forward import FeedForwardNN
+from src.models.feed_forward import FeedForwardNN
 from src.data.process_data import get_processed_data
 
 pipe = Pipeline([("model", LogisticRegression())]) #Logistic Regression as placeholder
@@ -130,11 +130,19 @@ def run_models (data_method: str = "correlation_adjusted", skip_model_grids: str
     model_dir = os.path.join(base_dir, "best_models")
     param_dir = os.path.join(base_dir, "best_models_params")
     X_train, X_test, y_train, y_test, X_train_smote, y_train_smote, X_train_raw, y_train_raw, df = get_processed_data(data_method)
+    X_train_smote = X_train_smote.to_numpy(dtype=np.float32) 
     param_grid_nn_ff[0]["model__module__in_dim"]=[X_train_smote.shape[1]]
+    param_grid_log_reg[0]["model"] = [LogisticRegression(max_iter=1000, random_state=42)]
+    param_grid_rf[0]["model"]      = [RandomForestClassifier(random_state=42)]
+    param_grid_xgb[0]["model"]     = [XGBClassifier(tree_method="hist", random_state=42, n_jobs=1)]
     for name, grid in grids.items():
         if skip_model_grids is not None and name in skip_model_grids:
             continue
-        grid.fit(X_train_smote, y_train_smote)
+        if name == "nn":
+            y_train_smote_nn = np.asarray(y_train_smote, dtype=np.float32).reshape(-1)
+            grid.fit(X_train_smote, y_train_smote_nn)
+        else:
+            grid.fit(X_train_smote, y_train_smote)
         print("all results: ", grid.cv_results_)
         best_params = grid.best_params_
         best_score = grid.best_score_
